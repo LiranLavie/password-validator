@@ -1,8 +1,16 @@
 #! /bin/bash
- 
+
+#FLAGS
+while getopts 'f:' OPTION
+do
+  case "$OPTION" in
+    f) Filename=${OPTARG}
+  esac  
+done
+
 #VARIABLES 
-PasswordStr=${@}
-PasswordLen=${#PasswordStr}
+PasswordStr=""
+PasswordLen=""
 MinChar=10
 
 #COLOR VARIABLES
@@ -45,9 +53,38 @@ else
 fi     
 }
 
-#START PASSWORD VALIDATION 
+function isPassFormFile(){
+#check if Filename is emmpty  
+if [[ -z "$Filename" ]]
+then
+  return 1
+else
+  return 0
+fi
+}
 
-#CHECK THE PASSWORD LENGTH
+function readPassFromFile(){
+while read  line; do
+# reading each line and appand it to passwordStr var
+PasswordStr+=$line
+done < $1
+}
+
+
+#START PASSWORD VALIDATION
+
+# CHECK IF PASSWORD IS FROM FILE
+if isPassFormFile
+then
+  readPassFromFile $Filename
+else
+  PasswordStr="${@}"
+fi
+
+#SET PASSWORD LENGTH
+PasswordLen=${#PasswordStr}
+
+#CHECK THE PASSWORD
 if checkPassLen $PasswordLen MinChar -qe 0
 then
 #CHECK FOR ALPHABET AND NUMBER
